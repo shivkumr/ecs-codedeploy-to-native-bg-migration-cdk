@@ -54,20 +54,20 @@ native to port 80. One listener port change per deploy — no conflict.
 cd cdk/scenario1-single-stack-portswap
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-cdk bootstrap aws://760221989975/us-west-2 --profile 9975
+cdk bootstrap aws://$CDK_ACCOUNT/$CDK_REGION
 
 # Phase 1 — Deploy CodeDeploy BG (initial state)
-cdk deploy EcsMigrationStack --profile 9975 --require-approval never
+cdk deploy EcsMigrationStack --require-approval never
 
 # Phase 2 — Deploy native ECS service alongside on port 8080
-cdk deploy EcsMigrationStack -c phase=2 --profile 9975 --require-approval never
+cdk deploy EcsMigrationStack -c phase=2 --require-approval never
 curl http://<ALBDNSName>:8080   # ← MUST return 200 before proceeding
 
 # Phase 2b — Free port 80 (move CodeDeploy to temp port 9999)
-cdk deploy EcsMigrationStack -c phase=2b --profile 9975 --require-approval never
+cdk deploy EcsMigrationStack -c phase=2b --require-approval never
 
 # Phase 3b — Cutover: native ECS takes over port 80
-cdk deploy EcsMigrationStack -c phase=3b --profile 9975 --require-approval never
+cdk deploy EcsMigrationStack -c phase=3b --require-approval never
 curl http://<ALBDNSName>        # ← native ECS serving production
 ```
 
@@ -114,19 +114,19 @@ State 2 — deployment_type=native
 cd cdk/scenario2-inplace
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-cdk bootstrap aws://760221989975/us-west-2 --profile 9975
+cdk bootstrap aws://$CDK_ACCOUNT/$CDK_REGION
 
 # Step 1 — Deploy initial CodeDeploy BG state
-cdk deploy EcsBgStack --profile 9975 --require-approval never
+cdk deploy EcsBgStack --require-approval never
 
 # Step 2 — Demo: green deploy via CodeDeploy (optional, shows CodeDeploy BG in action)
-cdk deploy EcsBgStack -c image=nginxdemos/hello:plain-text --profile 9975 --require-approval never
+cdk deploy EcsBgStack -c image=nginxdemos/hello:plain-text --require-approval never
 
 # Step 3 — MIGRATION: switch to ECS native (~30 sec downtime)
-cdk deploy EcsBgStack -c deployment_type=native --profile 9975 --require-approval never
+cdk deploy EcsBgStack -c deployment_type=native --require-approval never
 
 # Step 4 — Demo: green deploy via ECS native (optional, shows ECS native BG in action)
-cdk deploy EcsBgStack -c deployment_type=native -c image=nginx:alpine --profile 9975 --require-approval never
+cdk deploy EcsBgStack -c deployment_type=native -c image=nginx:alpine --require-approval never
 ```
 
 ### Why ServiceName is omitted in native mode
@@ -185,4 +185,4 @@ DEMO-APPROACHES.md                     ← Background notes on all approaches ex
 ```
 
 > **Note on cleanup:** `cdk destroy` may fail with a cluster deletion race condition.
-> If it does, run: `aws cloudformation delete-stack --stack-name <name> --region us-west-2 --profile 9975`
+> If it does, run: `aws cloudformation delete-stack --stack-name <name> --region us-west-2`

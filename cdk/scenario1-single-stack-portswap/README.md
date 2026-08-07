@@ -71,7 +71,7 @@ pip install -r requirements.txt
 ### Phase 1 — Deploy CodeDeploy BG (initial state)
 
 ```bash
-cdk deploy EcsMigrationStack --profile 9975 --require-approval never
+cdk deploy EcsMigrationStack --require-approval never
 ```
 
 **What deploys:**
@@ -92,7 +92,7 @@ curl -s -o /dev/null -w "%{http_code}" http://<ALBDNSName>
 ### Phase 2 — Add native ECS service on port 8080
 
 ```bash
-cdk deploy EcsMigrationStack -c phase=2 --profile 9975 --require-approval never
+cdk deploy EcsMigrationStack -c phase=2 --require-approval never
 ```
 
 **What changes:**
@@ -118,7 +118,7 @@ curl -s -o /dev/null -w "%{http_code}" http://$ALB:8080   # 200
 ### Phase 2b — Move CodeDeploy listener to temp port (frees port 80)
 
 ```bash
-cdk deploy EcsMigrationStack -c phase=2b --profile 9975 --require-approval never
+cdk deploy EcsMigrationStack -c phase=2b --require-approval never
 ```
 
 **What changes:**
@@ -143,7 +143,7 @@ curl -s -o /dev/null -w "%{http_code}" http://$ALB:8080   # 200
 **Rollback at this point:**
 ```bash
 # Simply redeploy phase 2 — moves CDListener back to port 80
-cdk deploy EcsMigrationStack -c phase=2 --profile 9975 --require-approval never
+cdk deploy EcsMigrationStack -c phase=2 --require-approval never
 ```
 
 ---
@@ -151,7 +151,7 @@ cdk deploy EcsMigrationStack -c phase=2 --profile 9975 --require-approval never
 ### Phase 3b — Port swap (cutover — native takes port 80)
 
 ```bash
-cdk deploy EcsMigrationStack -c phase=3b --profile 9975 --require-approval never
+cdk deploy EcsMigrationStack -c phase=3b --require-approval never
 ```
 
 **What changes in one CFN changeset:**
@@ -172,9 +172,9 @@ aws ecs describe-services \
   --cluster ecs-bg-demo-cluster \
   --services $(aws ecs list-services \
     --cluster ecs-bg-demo-cluster \
-    --region us-west-2 --profile 9975 \
+    --region us-west-2 \
     --query 'serviceArns[0]' --output text) \
-  --region us-west-2 --profile 9975 \
+  --region us-west-2 \
   --query 'services[0].{Controller:deploymentController.type,Strategy:deploymentConfiguration.strategy}' \
   --output json
 # Expected: {"Controller": "ECS", "Strategy": "BLUE_GREEN"}
@@ -188,7 +188,7 @@ aws ecs update-service \
   --cluster ecs-bg-demo-cluster \
   --service <service-name> \
   --task-definition <previous-task-def-arn> \
-  --region us-west-2 --profile 9975
+  --region us-west-2
 ```
 
 ---
@@ -199,7 +199,7 @@ Once on native, trigger a deployment by updating the image:
 
 ```bash
 cdk deploy EcsMigrationStack -c phase=3b -c image=nginx:alpine \
-  --profile 9975 --require-approval never
+  --require-approval never
 ```
 
 ECS handles the blue/green shift internally — creates green tasks, shifts traffic,
@@ -210,7 +210,7 @@ runs bake time (1 min), terminates blue tasks.
 ## Cleanup
 
 ```bash
-cdk destroy EcsMigrationStack --profile 9975 --force
+cdk destroy EcsMigrationStack --force
 ```
 
 ---
