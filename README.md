@@ -200,7 +200,6 @@ cdk/
         ├── config.py
         └── ecs_bg_stack.py
 
-CUSTOMER-QA.md                         ← Customer Q&A with CDK solution
 DEMO-APPROACHES.md                     ← Background notes on all approaches explored
 ```
 
