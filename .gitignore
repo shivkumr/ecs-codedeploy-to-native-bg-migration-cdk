@@ -1,0 +1,15 @@
+CUSTOMER-QA.md
+Claude.md
+docs/
+.claude/
+
+# Python virtual environments
+cdk/*/.venv/
+
+# CDK output
+cdk/*/cdk.out/
+
+# Python cache
+**/__pycache__/
+**/*.pyc
+.DS_Store

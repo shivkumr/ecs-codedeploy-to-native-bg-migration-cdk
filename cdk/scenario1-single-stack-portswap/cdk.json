@@ -1,0 +1,10 @@
+{
+  "app": "python3 app.py",
+  "context": {
+    "@aws-cdk/aws-lambda:recognizeLayerVersion": true,
+    "phase": "1",
+    "image": "nginxdemos/hello:latest",
+    "prod_port": "80",
+    "native_port": "8080"
+  }
+}
