@@ -16,6 +16,28 @@ differ in *how* they handle that replacement.
 
 ---
 
+## Prerequisites
+
+**Tools:** Python 3, Node.js, AWS CDK CLI (`npm install -g aws-cdk`)
+
+**AWS credentials:** Configure your AWS CLI profile or set `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY`.
+
+**Environment variables:** Copy `.env.example` to `.env`, fill in your values, then source it:
+
+```bash
+cp .env.example .env
+# Edit .env with your account ID, region, VPC ID, and two subnet IDs
+source .env
+```
+
+**Bootstrap CDK** (one-time per account/region):
+
+```bash
+cdk bootstrap aws://$CDK_ACCOUNT/$CDK_REGION
+```
+
+---
+
 ## Scenario 1 — Parallel Services, Port Swap ⭐ Recommended for Production
 
 **Location:** `cdk/scenario1-single-stack-portswap/`
@@ -54,7 +76,6 @@ native to port 80. One listener port change per deploy — no conflict.
 cd cdk/scenario1-single-stack-portswap
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-cdk bootstrap aws://$CDK_ACCOUNT/$CDK_REGION
 
 # Phase 1 — Deploy CodeDeploy BG (initial state)
 cdk deploy EcsMigrationStack --require-approval never
@@ -114,7 +135,6 @@ State 2 — deployment_type=native
 cd cdk/scenario2-inplace
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-cdk bootstrap aws://$CDK_ACCOUNT/$CDK_REGION
 
 # Step 1 — Deploy initial CodeDeploy BG state
 cdk deploy EcsBgStack --require-approval never
